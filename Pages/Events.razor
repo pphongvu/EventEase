@@ -1,0 +1,36 @@
+@page "/events"
+@inject EventEase.Services.MockEventService EventService
+@using EventEase.Models
+
+<h3>Upcoming Events</h3>
+
+<div class="row">
+    @foreach (var ev in events)
+    {
+        if (!ev.IsValid())
+        {
+            <p style="color:red;">Invalid event data.</p>
+            continue;
+        }
+
+        <div class="col-md-4 mb-3">
+            <div class="card">
+                <div class="card-body">
+                    <h5>@ev.Name</h5>
+                    <p>@ev.Date.ToShortDateString()</p>
+                    <p>@ev.Location</p>
+                    <a class="btn btn-primary" href="/events/@ev.Id">View Details</a>
+                </div>
+            </div>
+        </div>
+    }
+</div>
+
+@code {
+    private List<EventItem> events = new();
+
+    protected override void OnInitialized()
+    {
+        events = EventService.GetEvents();
+    }
+}

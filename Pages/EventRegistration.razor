@@ -1,0 +1,67 @@
+@page "/events/{id:int}/register"
+@inject EventEase.Services.MockEventService EventService
+@inject EventEase.Services.AttendanceService AttendanceService
+
+@using EventEase.Models
+
+<h3>Register for Event</h3>
+
+@if (eventItem == null)
+{
+    <h3>Event Not Found</h3>
+    <p>You cannot register because this event does not exist.</p>
+
+    <a class="btn btn-primary" href="/events">Back to Events</a>
+}
+else
+{
+    <h4>@eventItem.Name</h4>
+    <p>@eventItem.Date.ToLongDateString() - @eventItem.Location</p>
+
+    <EditForm Model="@registration" OnValidSubmit="HandleSubmit">
+        <DataAnnotationsValidator />
+        <ValidationSummary />
+
+        <div class="mb-3">
+            <label>Name</label>
+            <InputText class="form-control" @bind-Value="registration.UserName" />
+        </div>
+
+        <div class="mb-3">
+            <label>Email</label>
+            <InputText class="form-control" @bind-Value="registration.Email" />
+        </div>
+
+        <div class="mb-3">
+            <label>Attendees</label>
+            <InputNumber class="form-control" @bind-Value="registration.AttendeeCount" />
+        </div>
+
+        <button class="btn btn-primary">Submit</button>
+    </EditForm>
+
+    @if (!string.IsNullOrEmpty(message))
+    {
+        <p class="mt-3">@message</p>
+    }
+}
+
+@code {
+    [Parameter] public int Id { get; set; }
+
+    private EventItem? eventItem;
+    private Registration registration = new();
+    private string? message;
+
+    protected override void OnParametersSet()
+    {
+        eventItem = EventService.GetEvent(Id);
+        registration.EventId = Id;
+    }
+
+    private void HandleSubmit()
+    {
+        AttendanceService.MarkAttendance(Id, registration.UserName);
+        message = "Registration saved and attendance recorded (mock).";
+    }
+}

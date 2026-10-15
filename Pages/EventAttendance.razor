@@ -1,0 +1,45 @@
+@page "/events/{id:int}/attendance"
+@inject EventEase.Services.MockEventService EventService
+@inject EventEase.Services.AttendanceService AttendanceService
+@using EventEase.Models
+
+<h3>Attendance Tracker</h3>
+
+@if (eventItem == null)
+{
+    <p>Event not found.</p>
+}
+else
+{
+    <h4>@eventItem.Name</h4>
+    <p>@eventItem.Date.ToLongDateString() - @eventItem.Location</p>
+
+    <h5 class="mt-4">Attendees</h5>
+
+    @if (!records.Any())
+    {
+        <p>No attendees have been recorded yet.</p>
+    }
+    else
+    {
+        <ul>
+            @foreach (var r in records)
+            {
+                <li>@r.UserName (@r.Timestamp.ToShortTimeString())</li>
+            }
+        </ul>
+    }
+}
+
+@code {
+    [Parameter] public int Id { get; set; }
+
+    private EventItem? eventItem;
+    private List<AttendanceRecord> records = new();
+
+    protected override void OnParametersSet()
+    {
+        eventItem = EventService.GetEvent(Id);
+        records = AttendanceService.GetAttendance(Id);
+    }
+}
